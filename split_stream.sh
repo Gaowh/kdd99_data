@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source ./scripts/get_fields.sh
+
 while getopts :r: opt
 do
     case "$opt" in
@@ -69,18 +71,22 @@ done
 editcap -c 1 $udpdat $udpstreampath/udpstream
 editcap -c 1 $icmpdat $icmpstreampath/icmpstream
 
+rm -rf $tcpdat
+rm -rf $udpdat
+rm -rf $icmpdat
+
 #对ipv6数据包分流
 tshark -r $ipv6dat -R "tcp" -w ./ipv6/tcpdat
 tshark -r $ipv6dat -R "udp" -w ./ipv6/udpdat
-tshark -r $ipv6dat -R "icmp" -w ./ipv6/icmpdat
+tshark -r $ipv6dat -R "icmpv6" -w ./ipv6/icmpdat
 
 tcpdat=./ipv6/tcpdat
 udpdat=./ipv6/udpdat
 icmpdat=./ipv6/icmpdat
 
-tcpstreampath=./ipv6/tcpstream
-udpstreampath=./ipv6/udpstream
-icmpstreampath=./ipv6/icmpstream
+tcpstreampath6=./ipv6/tcpstream
+udpstreampath6=./ipv6/udpstream
+icmpstreampath6=./ipv6/icmpstream
 
 i=1
 while [ "$i" ];do
@@ -101,4 +107,18 @@ done
 editcap -c 1 $udpdat $udpstreampath/udpstream
 editcap -c 1 $icmpdat $icmpstreampath/icmpstream
 
+rm -rf $tcpdat
+rm -rf $udpdat
+rm -rf $icmpdat
+
+rm -rf $ipv4dat
+rm -rf $ipv6dat
+
+echo Split_stream Done!
+echo call fields func!
+
+mkdir ./fields_ipv4
+mkdir ./fields_ipv6
+ipv4_get_fields $tcpstreampath $udpstreampath $icmpstreampath ./fields_ipv4
+ipv6_get_fields $tcpstreampath6 $udpstreampath6 $icmpstreampath6 ./fields_ipv6
 
