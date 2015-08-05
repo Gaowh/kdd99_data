@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function ipv4_tcp_get_kdd99 {
+function ipv6_tcp_get_kdd99 {
     if [ $# -ne 2 ]
     then
 	echo "Usage: must specified stream fields path and outfile"
@@ -94,7 +94,7 @@ function ipv4_tcp_get_kdd99 {
     done
 }
 
-function ipv4_udp_get_kdd99 {
+function ipv6_udp_get_kdd99 {
     if [ $# -ne 2 ]
     then
 	echo "Usage: must specified stream infile and outfile"
@@ -147,7 +147,7 @@ function ipv4_udp_get_kdd99 {
     done
 } 
 
-function ipv4_icmp_get_kdd99 {
+function ipv6_icmp_get_kdd99 {
 #对于icmp来说，所有的特征中只有协议类型字段有效，其余的全部置0 
     
     if [ $# -ne 2 ]
@@ -189,4 +189,6 @@ function ipv4_icmp_get_kdd99 {
 	echo $kdd99data >> $oufile
     done
 }
+
+
 

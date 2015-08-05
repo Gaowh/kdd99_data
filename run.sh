@@ -2,7 +2,8 @@
 
 source ./scripts/get_fields.sh
 source ./scripts/ipv4_get_kdd99.sh
-
+source ./scripts/ipv6_get_kdd99.sh
+source ./scripts/func.sh
 
 while getopts :r: opt
 do
@@ -31,8 +32,6 @@ mkdir ./ipv4/icmpstream
 mkdir ./ipv6/tcpstream
 mkdir ./ipv6/udpstream
 mkdir ./ipv6/icmpstream
-
-export tcpstream4
 
 #分ipv4和ipv6的数据
 
@@ -64,11 +63,8 @@ while [ "$i" ];do
     res=`ls -l $tcpstreampath/tcpstream_$i | awk '{print $5}'`
     if [ "$res" -eq 112 ]
     then	
-	echo tcpstream_$i is empty
 	rm -rf $tcpstreampath/tcpstream_$i
 	break
-    else 
-	echo create tcpstream_$i
     fi
     i=`expr $i + 1`
 done
@@ -96,21 +92,18 @@ icmpstreampath6=./ipv6/icmpstream
 i=1
 while [ "$i" ];do
     cmd="tcp.stream eq $i"
-    tshark -r $tcpdat -R "$cmd" -w $tcpstreampath/tcpstream_$i
-    res=`ls -l $tcpstreampath/tcpstream_$i | awk '{print $5}'`
+    tshark -r $tcpdat -R "$cmd" -w $tcpstreampath6/tcpstream_$i
+    res=`ls -l $tcpstreampath6/tcpstream_$i | awk '{print $5}'`
     if [ "$res" -eq 112 ]
     then	
-	echo tcpstream_$i is empty
-	rm -rf $tcpstreampath/tcpstream_$i
+	rm -rf $tcpstreampath6/tcpstream_$i
 	break
-    else 
-	echo create tcpstream_$i
     fi
     i=`expr $i + 1`
 done
 
-editcap -c 1 $udpdat $udpstreampath/udpstream
-editcap -c 1 $icmpdat $icmpstreampath/icmpstream
+editcap -c 1 $udpdat $udpstreampath6/udpstream
+editcap -c 1 $icmpdat $icmpstreampath6/icmpstream
 
 rm -rf $tcpdat
 rm -rf $udpdat
@@ -128,6 +121,10 @@ ipv4_get_fields $tcpstreampath $udpstreampath $icmpstreampath ./fields_ipv4
 ipv6_get_fields $tcpstreampath6 $udpstreampath6 $icmpstreampath6 ./fields_ipv6
 
 ipv4_tcp_get_kdd99 ./fields_ipv4/tcpfields ./pre_kdd99.dat
-#ipv4_udp_get_kdd99 ./fields_ipv4/udpfields/fields_udp_all ./pre_kdd99.dat
-#ipv4_icmp_get_kdd99 ./fields_ipv4/icmpfields/fields_icmp_all ./pre_kdd99.dat
+ipv4_udp_get_kdd99 ./fields_ipv4/udpfields ./pre_kdd99.dat
+ipv4_icmp_get_kdd99 ./fields_ipv4/icmpfields ./pre_kdd99.dat
+
+ipv6_tcp_get_kdd99 ./fields_ipv6/tcpfields ./pre_kdd99.dat
+ipv6_udp_get_kdd99 ./fields_ipv6/udpfields ./pre_kdd99.dat
+ipv6_icmp_get_kdd99 ./fields_ipv6/icmpfields ./pre_kdd99.dat
 

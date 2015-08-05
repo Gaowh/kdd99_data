@@ -40,25 +40,29 @@ function ipv4_get_fields {
     do
 	#echo $file
         tshark -r $tcpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative -e ip.src -e tcp.srcport\
-	    	    -e ip.dst -e tcp.dstport -e tcp.len  -e tcp.segment.error -e tcp.flags >> $tcppath/fields_stream_$i
+	    	    -e ip.dst -e tcp.dstport -e tcp.len  -e tcp.segment.error -e tcp.flags >> $tcppath/tcp_fields_stream_$i
 	i=`expr $i + 1`
     done
 
-    
-#提取udp字段，保存在一个文件中
+
+#修改 ，，不能保存在一个文件当中，还是必须每条数据报文的特征保存在不同的文件中
+    i=1
     for file in `ls $udpstreampath`
     do
 	#echo $file
 	tshark -r $udpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative -e ip.src -e udp.srcport\
-					   -e ip.dst -e udp.dstport -e udp.len >> $udppath/fields_udp_all
+					   -e ip.dst -e udp.dstport -e udp.len >> $udppath/udp_fields_stream_$i
+	i=`expr $i + 1`
     done
 
-#提取icmp字段，保存在一个文件中
+# 修改如上， 必须分开保存在不同的文件当中
+    i=1
     for file in `ls $icmpstreampath`
     do
 	#echo $file
 	tshark -r $icmpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative \
-							       -e ip.src -e ip.dst >> $icmppath/fields_icmp_all
+							       >> $icmppath/icmp_fields_icmp_$i
+	i=`expr $i + 1`
     done
 
     echo function ipv4_get_fields done! 
@@ -97,7 +101,7 @@ function ipv6_get_fields {
     do
 	#echo $file
 	tshark -r $tcpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative -e ipv6.src -e tcp.srcport\
-	    -e ipv6.dst -e tcp.dstport -e tcp.len  -e tcp.segment.error -e tcp.flags >> $tcppath/fields_stream_$i
+	    -e ipv6.dst -e tcp.dstport -e tcp.len  -e tcp.segment.error -e tcp.flags >> $tcppath/tcp_fields_stream_$i
 	i=`expr $i + 1`
     done
 
@@ -106,14 +110,17 @@ function ipv6_get_fields {
     do
 	#echo $file
 	tshark -r $udpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative -e ipv6.src -e udp.srcport\
-					   -e ipv6.dst -e udp.dstport >> $udppath/fields_udp_all
+					   -e ipv6.dst -e udp.dstport >> $udppath/udp_fields_stream_$i
+	i=`expr $i + 1`
     done
 
+    i=1
     for file in `ls $icmpstreampath`
     do
 	#echo $file
 	tshark -r $icmpstreampath/$file -T fields -E separator=# -e frame.time -e frame.time_relative\
-							       -e ipv6.src -e ipv6.dst >> $icmppath/fields_icmp_all
+    							       >> $icmppath/icmp_fields_stream_$i
+    i=`expr $i + 1`
     done
     
     echo function ipv6_get_fields done!
