@@ -106,4 +106,22 @@ function get_tcp_urgent_packets {
 
     total=`awk -F# -v tot=0 '{if(strtonum("$9") >= 32) tot=tot+1; print tot}' $file | sed -n '$p'`
     echo $total
-} 
+}
+
+function pre_sort {
+    if [ $# -ne 1 ]
+    then
+	echo Usage: need infile
+	return
+    fi
+
+    data=$1
+    
+    LC_TIME=en_US.UTF-8
+    export LC_TIME
+    
+    sed -n 's/,//; s/ /#/gp' $data | sort -t '#' -k 3n -k 1M -k 2n -k 4 -o $data
+    
+    LC_TIME=zh_CN.UTF-8
+    export LC_TIME
+}
