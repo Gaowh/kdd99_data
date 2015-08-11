@@ -15,12 +15,24 @@ function ipv6_tcp_get_kdd99 {
     for file in `ls $fieldspath`
     do
 	
-	#因为之后计算要用到相对时间，所以这里每个数据中必须要将没个流的起始时间保存下来
+	#因为之后计算要用到绝对时间，所以这里每个数据中必须要将没个流的起始时间保存下来
 	abstime=`sed -n '1p' $fieldspath/$file | awk -F# '{print $1}'`
+	abstime=`date +%s -d "$abstime"`
 	kdd99data=$abstime
+
+	#必须先保存下源地址
+	sip=`sed -n '1p' $fieldspath/$file | awk -F# '{print $3}'`
+	kdd99data=$kdd99data#$sip
+
 	#同上，还必须保存当前连接的目的地址
 	ip=`sed -n '1p' $fieldspath/$file | awk -F# '{print $5}'`
 	kdd99data=$kdd99data#$ip
+
+	#同上，源端口也必须保存下来
+	sport=`sed -n '1p' $fieldspath/$file | awk -F# '{print $4}'`
+	kdd99data=$kdd99data#$sport
+
+
 
 	#  1、持续时间(现在假设是一个流的起始时间和结束时间都在一天之内，不会跨越天)
 	start=` sed -n '1p' $fieldspath/$file | awk -F# '{print $2}'`
@@ -108,13 +120,24 @@ function ipv6_udp_get_kdd99 {
     
     for file in `ls $fieldspath`;
     do
+	#因为之后计算要用到绝对时间，所以这里每个数据中必须要将没个流的起始时间保存下来
 	abstime=`sed -n '1p' $fieldspath/$file | awk -F# '{print $1}'`
+	abstime=`date +%s -d "$abstime"`
 	kdd99data=$abstime
-	echo abstime: $abstime
 
+	#必须先保存下源地址
+	sip=`sed -n '1p' $fieldspath/$file | awk -F# '{print $3}'`
+	kdd99data=$kdd99data#$sip
+
+	#同上，还必须保存当前连接的目的地址
 	ip=`sed -n '1p' $fieldspath/$file | awk -F# '{print $5}'`
 	kdd99data=$kdd99data#$ip
-	echo ip: $ip
+
+	#同上，源端口也必须保存下来
+	sport=`sed -n '1p' $fieldspath/$file | awk -F# '{print $4}'`
+	kdd99data=$kdd99data#$sport
+	
+
 	#1 持续时间为0
 	kdd99data=$kdd99data#0
 	echo time: 0
@@ -163,15 +186,26 @@ function ipv6_icmp_get_kdd99 {
     
     for file in `ls $fieldspath`;
     do
-	echo $file
-	abstime=`sed -n '1p' $fieldspath/$file | awk -F# '{print $1}'`
-	kdd99data=$abstime
 	
-	echo abstime: $abstime
-	#ip=`sed -n '1p' $fieldspath/$file | awk -F# '{print $5}'`
+	#因为之后计算要用到绝对时间，所以这里每个数据中必须要将没个流的起始时间保存下来
+	abstime=`sed -n '1p' $fieldspath/$file | awk -F# '{print $1}'`
+	abstime=`date +%s -d "$abstime"`
+	kdd99data=$abstime
+
+	#必须先保存下源地址
+	sip=0
+	kdd99data=$kdd99data#$sip
+
+	#同上，还必须保存当前连接的目的地址
 	ip=0
 	kdd99data=$kdd99data#$ip
-	echo ip: 0
+
+	#同上，源端口也必须保存下来
+	sport=0
+	kdd99data=$kdd99data#$sport
+	#以上三个字段置0 是为了与tcp和udp的数据保持相同的格式
+
+
 	#1 持续时间为0
 	kdd99data=$kdd99data#0
 	echo time: 0
@@ -189,6 +223,3 @@ function ipv6_icmp_get_kdd99 {
 	echo $kdd99data >> $oufile
     done
 }
-
-
-

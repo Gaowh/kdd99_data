@@ -117,11 +117,29 @@ function pre_sort {
 
     data=$1
     
-    LC_TIME=en_US.UTF-8
-    export LC_TIME
+#   LC_TIME=en_US.UTF-8
+#   export LC_TIME
+#   sed -n 's/,//; s/ /#/gp' $data | sort -t '#' -k 3n -k 1M -k 2n -k 4 -o $data
+#   LC_TIME=zh_CN.UTF-8
+#   export LC_TIME
+
+    sort -t '#' -k 1n $data -o $data
+}
+
+
+
+#时间格式：Jul#16#2015#20:25:12.625988000
+#函数功能是对两个这样的时间进行相减，判断是否时间差在两秒之内
+function time_sub {
+    if [ $# -ne 2 ] 
+    then
+	echo -1
+	return 
+    fi
+
+    time1=$1
+    time2=$2
     
-    sed -n 's/,//; s/ /#/gp' $data | sort -t '#' -k 3n -k 1M -k 2n -k 4 -o $data
-    
-    LC_TIME=zh_CN.UTF-8
-    export LC_TIME
+    sub=`expr $time1 - $time2`
+    echo $sub
 }
