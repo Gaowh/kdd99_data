@@ -1,5 +1,10 @@
 #!/bin/sh
 
+LC_TIME="en_US.UTF-8"
+export LC_TIME
+start_time=`date +%s`
+
+
 source ./scripts/get_fields.sh
 source ./scripts/ipv4_get_pre_data.sh
 source ./scripts/ipv6_get_pre_data.sh
@@ -81,11 +86,15 @@ editcap -c 1 $icmpdat $icmpstreampath/icmpstream
 rm -rf $tcpdat
 rm -rf $udpdat
 rm -rf $icmpdat
+echo ipv4 split down
+
 
 #对ipv6的三类数据包进行分流
 tshark -r $ipv6dat -R "tcp" -w ./ipv6/tcpdat
 tshark -r $ipv6dat -R "udp" -w ./ipv6/udpdat
 tshark -r $ipv6dat -R "icmpv6" -w ./ipv6/icmpdat
+
+echo flag1
 
 tcpdat=./ipv6/tcpdat
 udpdat=./ipv6/udpdat
@@ -110,9 +119,13 @@ while [ "$i" ];do
     i=`expr $i + 1`
 done
 
+echo flag2
+
 #将ipv6的udp和icmp进行分流
 editcap -c 1 $udpdat $udpstreampath6/udpstream
 editcap -c 1 $icmpdat $icmpstreampath6/icmpstream
+echo ipv6 split down
+
 
 rm -rf $tcpdat
 rm -rf $udpdat
@@ -130,7 +143,7 @@ mkdir ./fields_ipv4
 mkdir ./fields_ipv6
 ipv4_get_fields $tcpstreampath $udpstreampath $icmpstreampath ./fields_ipv4
 ipv6_get_fields $tcpstreampath6 $udpstreampath6 $icmpstreampath6 ./fields_ipv6
-
+echo get fields down
 
 #从上面提取的特征中提取出一部分kdd99特征和一些辅助的特征
 ipv4_tcp_get_kdd99 ./fields_ipv4/tcpfields ./pre_kdd99.dat
@@ -139,14 +152,24 @@ ipv4_icmp_get_kdd99 ./fields_ipv4/icmpfields ./pre_kdd99.dat
 ipv6_tcp_get_kdd99 ./fields_ipv6/tcpfields ./pre_kdd99.dat
 ipv6_udp_get_kdd99 ./fields_ipv6/udpfields ./pre_kdd99.dat
 ipv6_icmp_get_kdd99 ./fields_ipv6/icmpfields ./pre_kdd99.dat
+echo get predata down
+
 
 #将流按照时间排序
 pre_sort ./pre_kdd99.dat
+echo sort down
 
 get_kdd99_all ./pre_kdd99.dat ./kdd99_all.dat
+echo all data get down
 
 rm -rf ./fields_ipv4
 rm -rf ./fields_ipv6
 
 rm -rf ./ipv4
 rm -rf ./ipv6
+
+end_time=`date +%s`
+LC_TIME=zh_CN.UTF-8
+export LC_TIME
+
+awk -v s=$start_time -v e=$end_time 'BEGIN{printf("Time used: %.2f minutes\n", (e-s)/60)}'
